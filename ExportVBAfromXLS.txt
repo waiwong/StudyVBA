@@ -1,0 +1,102 @@
+--2020/02/07, by WangWei: 打开Excel－》工具－》宏－》安全性－》可靠发行商，选中“信任对于Visiual Basic 项目的访问”，按确定即可。
+Excel: Extract VBA code to text files (for diffing)
+
+http://www.pretentiousname.com/excel_extractvba
+
+** Introduction **
+
+Provided here is a simple tool which will open an Excel XLS file and
+extract all of its VBA code it to text files.
+
+The purpose of this tool is to give you a way to use text-based diff
+tools (e.g. Beyond Compare or WinMerge) on two versions of an Excel
+spreadsheet to see what has changed in the VBA code.
+
+Note that the extracted code should not be pasted back into Excel
+directly. Unfortunatley, it will contain some additional junk which
+will confuse the VBA editor. (You could remove the extra stuff and
+then paste the code, though.)
+
+The tool is actually a short VBScript, .vbs file, which automates
+Excel. You should run it from a command prompt, giving it the name
+of the XLS file whose VBA wish to extract.
+
+Users of Directory Opus[1] will find my Diff/Merge Toolbar[2] useful
+since it includes a button to run this script. If you are using the
+toolbar with Opus then you just have to select one or more XLS files
+and click the button to extract their VBA code.
+
+[1] See: http://www.pretentiousname.com/opus/
+[2] http://resource.dopus.com/viewtopic.php?t=2182
+
+** Source **
+
+Here is the script in text format so you can see how it works:
+
+--------------------------------------------------------------------
+
+option explicit
+
+Const vbext_ct_ClassModule = 2
+Const vbext_ct_Document = 100
+Const vbext_ct_MSForm = 3
+Const vbext_ct_StdModule = 1
+
+Main
+
+Sub Main
+    Dim xl
+    Dim fs
+    Dim WBook
+    Dim VBComp
+    Dim Sfx
+    Dim ExportFolder
+
+    If Wscript.Arguments.Count <> 1 Then
+        MsgBox "As the only argument, give the FULL path to an XLS file to extract all the VBA from it."
+    Else
+
+        Set xl = CreateObject("Excel.Application")
+        Set fs = CreateObject("Scripting.FileSystemObject")
+
+        xl.Visible = true
+
+        Set WBook = xl.Workbooks.Open(Trim(wScript.Arguments(0)))
+
+        ExportFolder = WBook.Path & "\" & fs.GetBaseName(WBook.Name)
+
+        fs.CreateFolder(ExportFolder)
+
+        For Each VBComp In WBook.VBProject.VBComponents
+            Select Case VBComp.Type
+                Case vbext_ct_ClassModule, vbext_ct_Document
+                    Sfx = ".cls"
+                Case vbext_ct_MSForm
+                    Sfx = ".frm"
+                Case vbext_ct_StdModule
+                    Sfx = ".bas"
+                Case Else
+                    Sfx = ""
+            End Select
+            If Sfx <> "" Then
+                On Error Resume Next
+                Err.Clear
+                VBComp.Export ExportFolder & "\" & VBComp.Name & Sfx
+                If Err.Number <> 0 Then
+                    MsgBox "Failed to export " & ExportFolder & "\" & VBComp.Name & Sfx
+                End If
+                On Error Goto 0
+            End If
+        Next
+
+        xl.Quit
+    End If
+End Sub
+
+--------------------------------------------------------------------
+
+** History **
+
+Version 1 (31st May 2005)
+
+    * Initial version. (Not put on my site until 14th November 2008)
