@@ -1,5 +1,5 @@
-# StudyVBA
+# Study VBA
 
-## for keep the source of VBA.
+## Keep the source of VBA
 
-## keep the samle and resourse of VBA
+## keep the sample and resource of VBA
