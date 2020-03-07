@@ -44,14 +44,18 @@ Sub Main
     strToday = replace(today,"/","")
     Wscript.Echo " today:",today, "=>",strToday
 
-    dim outPutFileName
+    dim outPutFileName, outPutFileNameAmount
     outPutFileName = strOutputPath & "\OutputFile_"& strToday &".csv"
+    outPutFileNameAmount = strOutputPath & "\OutputFileAmount_"& strToday &".csv"
     WScript.Echo " outPutFileName:",outPutFileName
 
     ''Find all csv file
     WScript.Echo "Working in directory: " & strPath
     
-    Dim objFolder, outputFile, objFile, inputFile
+    dim totalAmount
+    totalAmount = 0.0
+     
+    Dim objFolder, outputFile, outputFileAmount, objFile, inputFile
     Set objFolder = fso.GetFolder(strPath)
         'Set outputFile = fso.OpenTextFile(outPutFileName, 2, True) 'write/replace - don't append - create
         Set outputFile =  fso.OpenTextFile(outPutFileName, 2, False, -1)
@@ -81,9 +85,8 @@ Sub Main
         outputFile.WriteLine strHeader 'let's write our first line - the headers we have
         WScript.Echo "..Finsihed processing the headers - wrote to file: " & OutPutFileName
         
-        dim dataLine
+        dim dataLine,arrDataLine
         For Each objFile in objFolder.Files
-            
             If LCase(Right(objFile.Name, 4)) = LCase(".csv") Then 'only for .CSV files
                 WScript.Echo "Processing file for data: " & objFile.Name
                 Set inputFile = fso.OpenTextFile(strPath & "\" & objFile.Name, 1) 'reading
@@ -94,24 +97,45 @@ Sub Main
                         dataLine = inputFile.ReadLine
                         WScript.Echo dataLine
 
+                        'handle total amount, assume the 2nd field if amount CDbl(x)
+                        arrDataLine = Split(dataLine, ",", -1, 1)
+                        if IsNumeric(arrDataLine(1)) AND Not Instr(1, arrDataLine(0), "合", 1) > 0 then
+                            WScript.Echo "is number, do sum", arrDataLine(0),"=>", arrDataLine(1)
+                            totalAmount = totalAmount + CDbl(arrDataLine(1))
+                        else
+                            WScript.Echo "not number, ingore", arrDataLine(0),"=>", arrDataLine(1)
+                        end if
+
                         if Right(dataLine, 1) <> "," then
                             strHeader = dataLine & ","
                         end if
 
-                        dataLine=dataLine & """" & today & """"
-                        WScript.Echo dataLine  
+                        'dataLine=dataLine & """" & today & """"
+                        dataLine=dataLine & today
+                        'WScript.Echo dataLine  
                         outputFile.WriteLine dataLine
-                    Loop	
+                    Loop
                 inputFile.Close
                 Set inputFile = Nothing
             End If
-        Next		
 
-        outputFile.Close			
+            'WScript.Echo "exit for check only"
+            'Exit For
+        Next
+
+        outputFile.Close
         Set outputFile = Nothing
         WScript.Echo "..Finsihed - wrote to file: " & OutPutFileName
+        
+        Set outputFileAmount = fso.OpenTextFile(outPutFileNameAmount, 2, True)
+        outputFileAmount.Write "Total Amount, "
+        outputFileAmount.Write totalAmount
+        outputFileAmount.Close
+        Set outputFileAmount = Nothing
+        
+        WScript.Echo "..Finsihed - wrote total amount to file: " & outPutFileNameAmount
 
-    Set objFolder = Nothing        
+    Set objFolder = Nothing
     Set fso = Nothing
 
     WScript.Quit
