@@ -17,32 +17,31 @@ Sub Main
 
 	Set fs = CreateObject("Scripting.FileSystemObject")
 	Dim checkFile
-	'checkFile="C:\Project\StudySamples\VBA\studyVBA.xlsm"
 
 	if Wscript.Arguments.Count = 1 Then
 		checkFile = Trim(wScript.Arguments(0))
 	end if
 
-	MsgBox checkFile
+	Wscript.Echo checkFile
+	'MsgBox checkFile
 
 	If Not fs.FileExists(checkFile) Then
-		MsgBox "As the only argument, give the FULL path to an XLS file to extract all the VBA from it."
+		'MsgBox "As the only argument, give the FULL path to an XLS file to extract all the VBA from it."
+		Wscript.Echo "As the only argument, give the FULL path to an XLS file to extract all the VBA from it."
 	Else
 
 		Set xl = CreateObject("Excel.Application")
-		'Set fs = CreateObject("Scripting.FileSystemObject")
-
 		xl.Visible = true
 
 		Set WBook = xl.Workbooks.Open(Trim(wScript.Arguments(0)))
 
 		ExportFolder = WBook.Path & "\" & fs.GetBaseName(WBook.Name)
-		MsgBox ExportFolder
+		'MsgBox ExportFolder
+		Wscript ExportFolder
 		
 		if Not fs.FolderExists(ExportFolder) Then
 			fs.CreateFolder(ExportFolder)
 		end if
-		
 
 		For Each VBComp In WBook.VBProject.VBComponents
 			Select Case VBComp.Type

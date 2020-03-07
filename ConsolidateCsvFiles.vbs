@@ -83,7 +83,7 @@ Sub Main
 
         'WScript.Echo "Split for,", Join(Split(strHeader, ",", -1, 1),",")       
         outputFile.WriteLine strHeader 'let's write our first line - the headers we have
-        WScript.Echo "..Finsihed processing the headers - wrote to file: " & OutPutFileName
+        WScript.Echo "..Finished processing the headers - wrote to file: " & OutPutFileName
         
         dim dataLine,arrDataLine
         For Each objFile in objFolder.Files
@@ -103,11 +103,11 @@ Sub Main
                             WScript.Echo "is number, do sum", arrDataLine(0),"=>", arrDataLine(1)
                             totalAmount = totalAmount + CDbl(arrDataLine(1))
                         else
-                            WScript.Echo "not number, ingore", arrDataLine(0),"=>", arrDataLine(1)
+                            WScript.Echo "not number, ignore", arrDataLine(0),"=>", arrDataLine(1)
                         end if
 
                         if Right(dataLine, 1) <> "," then
-                            strHeader = dataLine & ","
+                            dataLine = dataLine & ","
                         end if
 
                         'dataLine=dataLine & """" & today & """"
@@ -125,7 +125,7 @@ Sub Main
 
         outputFile.Close
         Set outputFile = Nothing
-        WScript.Echo "..Finsihed - wrote to file: " & OutPutFileName
+        WScript.Echo "..Finished - wrote to file: " & OutPutFileName
         
         Set outputFileAmount = fso.OpenTextFile(outPutFileNameAmount, 2, True)
         outputFileAmount.Write "Total Amount, "
@@ -133,7 +133,7 @@ Sub Main
         outputFileAmount.Close
         Set outputFileAmount = Nothing
         
-        WScript.Echo "..Finsihed - wrote total amount to file: " & outPutFileNameAmount
+        WScript.Echo "..Finished - wrote total amount to file: " & outPutFileNameAmount
 
     Set objFolder = Nothing
     Set fso = Nothing
